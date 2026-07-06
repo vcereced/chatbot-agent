@@ -1,1 +1,2 @@
 LLM_URL = "http://llm:8000"
+REQUEST_TIMEOUT = 30

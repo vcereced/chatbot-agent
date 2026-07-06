@@ -1,4 +1,4 @@
-from app.schemas.generate import GenerateResponse
+from app.schemas import GenerateResponse
 
 
 class LLMService:

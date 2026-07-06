@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.schemas.generate import GenerateRequest, GenerateResponse
+from app.schemas import GenerateRequest, GenerateResponse
 from app.services.llm_service import LLMService
 
 router = APIRouter()

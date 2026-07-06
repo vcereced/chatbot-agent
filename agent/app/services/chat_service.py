@@ -1,5 +1,5 @@
 from app.clients.llm_client import LLMClient
-from app.schemas.chat import ChatResponse
+from app.schemas import ChatResponse
 
 
 class ChatService:
@@ -10,8 +10,6 @@ class ChatService:
 
     def chat(self, message: str) -> ChatResponse:
 
-        answer = self.llm.generate(message)
+        return self.llm.generate(message)
 
-        return ChatResponse(
-            response=answer
-        )
+        

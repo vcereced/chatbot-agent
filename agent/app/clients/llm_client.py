@@ -1,5 +1,19 @@
-class LLMClient:
+from app.clients.base_client import BaseClient
+from app.config import LLM_URL
+from app.schemas import ChatResponse
 
-    def generate(self, prompt: str) -> str:
 
-        return f"LLM recibido: {prompt}"
+class LLMClient(BaseClient):
+
+    def generate(self, prompt: str) -> ChatResponse:
+
+        data = self.post(
+            f"{LLM_URL}/generate",
+            {
+                "prompt": prompt
+            }
+        )
+
+        return ChatResponse(
+            response=data["text"]
+        )
