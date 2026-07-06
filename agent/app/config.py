@@ -1,0 +1,1 @@
+LLM_URL = "http://llm:8000"

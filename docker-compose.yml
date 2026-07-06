@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  nginx:
+    build:
+      context: ./nginx
+    ports:
+      - "8080:80"
+    depends_on:
+      - agent
+
+  agent:
+    build:
+      context: ./agent
+    expose:
+      - "8000"
+    volumes:
+      - ./agent:/app
+      - ./shared:/shared
+    environment:
+      PYTHONPATH: /shared
+
+  llm:
+    build:
+      context: ./llm
+    expose:
+      - "8000"
+    volumes:
+      - ./llm:/app
+      - ./shared:/shared
+    environment:
+      PYTHONPATH: /shared
+
+  # tools-executor:
+  #   build:
+  #     context: ./tools-executor
+  #   expose:
+  #     - "8001"
+  #   volumes:
+  #     - ./tools-executor:/app
+  #     - ./shared:/shared
+  #   environment:
+  #     PYTHONPATH: /shared
