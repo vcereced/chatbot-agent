@@ -19,6 +19,9 @@ services:
       - ./shared:/shared
     environment:
       PYTHONPATH: /shared
+      LLM_URL: http://llm:8000
+      TOOLS_URL: http://tools-executor:8000
+    
 
   llm:
     build:
@@ -35,7 +38,7 @@ services:
   #   build:
   #     context: ./tools-executor
   #   expose:
-  #     - "8001"
+  #     - "8000"
   #   volumes:
   #     - ./tools-executor:/app
   #     - ./shared:/shared

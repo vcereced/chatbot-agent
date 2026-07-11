@@ -1,31 +1,39 @@
+from typing import Type, TypeVar
+from app.config import config
+import logging
 import httpx
 
-from app.clients.exceptions import ClientError
-from app.config import REQUEST_TIMEOUT
+from pydantic import BaseModel
+
+logger = logging.getLogger(__name__)
+
+T = TypeVar("T", bound=BaseModel)
 
 
 class BaseClient:
 
     def __init__(self):
 
-        self.client = httpx.Client(
-            timeout=REQUEST_TIMEOUT
+        self.client = httpx.Client(timeout=config.REQUEST_TIMEOUT)
+
+    def post(
+        self,
+        url: str,
+        request: BaseModel,
+        response_model: Type[T],
+    ) -> T:
+
+        logger.info("POST %s", url)
+
+        response = self.client.post(
+            url,
+            json=request.model_dump(),
         )
 
-    def post(self, url: str, body: dict) -> dict:
+        response.raise_for_status()
 
-        try:
+        logger.info("Response %s", response.status_code)
 
-            response = self.client.post(
-                url,
-                json=body,
-                timeout=REQUEST_TIMEOUT
-            )
-
-            response.raise_for_status()
-
-            return response.json()
-
-        except httpx.HTTPError as e:
-
-            raise ClientError(str(e))
+        return response_model.model_validate(
+            response.json()
+        )
