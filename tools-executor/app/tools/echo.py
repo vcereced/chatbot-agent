@@ -15,3 +15,4 @@ class EchoTool(BaseTool):
 
         args = EchoArguments.model_validate(arguments)
         return args.text
+        # return "soy el echo"

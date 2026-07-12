@@ -14,4 +14,11 @@ service = ChatService()
 def chat(request: ChatRequest):
     logger.info(f"Received chat request: {request.message}")
 
-    return service.chat(request)
+    response = service.chat(
+        conversation_id=request.conversation_id,
+        message=request.message,
+    )
+
+    return ChatResponse(
+        message=response,
+    )

@@ -13,4 +13,6 @@ service = LLMService()
 def generate(request: GenerateRequest):
 
     logger.info(f"generate request: {request}")
-    return service.generate(request.prompt) 
+    result = service.generate(request.messages)
+
+    return GenerateResponse(result=result)

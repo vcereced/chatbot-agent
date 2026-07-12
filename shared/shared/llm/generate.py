@@ -1,13 +1,11 @@
 from pydantic import BaseModel
-from shared.schemas import ChatRequest, ChatResponse
-from shared.commom.ToolCall import ToolCall
+from shared.domain.message import Message
+from shared.domain.generate_result import GenerateResult
 
 
 class GenerateRequest(BaseModel):
-    prompt: str
+    messages: list[Message]
 
 
 class GenerateResponse(BaseModel):
-    text: str | None = None
-
-    tool_call: ToolCall | None = None
+    result: GenerateResult

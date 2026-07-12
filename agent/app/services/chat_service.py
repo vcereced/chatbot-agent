@@ -1,32 +1,64 @@
-from app.clients.llm_client import LLMClient
-from app.clients.tools_client import ToolsClient
-from app.schemas import ChatResponse, ChatRequest, GenerateResponse
+from shared.agent.chat import ChatRequest, ChatResponse
+from shared.llm.generate import GenerateRequest, GenerateResponse
+from shared.domain.message import Message
+from shared.domain.toolresult import ToolResult
 from shared.logging.logger import configure_logging
 
-logger = configure_logging(__name__)
+from app.clients.llm_client import LLMClient
+from app.clients.tools_client import ToolsClient
+from app.clients.memory_client import MemoryClient
 
+
+logger = configure_logging(__name__)
+        
 
 class ChatService:
 
     def __init__(self):
 
+        self.memory = MemoryClient()
         self.llm = LLMClient()
         self.tools = ToolsClient()
-        # self.memory = MemoryClient()  # Assuming you have a MemoryClient for managing conversation history
-        logger.info("ChatService initialized with LLMClient and ToolsClient.")
 
-    def chat(self, request: ChatRequest) -> ChatResponse:
+    def chat(
+        self,
+        conversation_id: str,
+        message: str,
+    ) -> str:
+
         logger.info(f"Processing chat message: {request.message}")
-        
-        llm_response: GenerateResponse = self.llm.generate(request)
+        conversation = self.memory.get(conversation_id) #call to MEMORY CLIENT 
 
-        if llm_response.tool_call is None:
-            logger.info(f"LLM response: {llm_response.text}")
-            return ChatResponse(response = llm_response.text)
-        else:
-            tool_response = self.tools.execute(llm_response.tool_call)
-            logger.info(f"Tool response: {tool_response.result}")
-            return ChatResponse(response=tool_response.result)
-       
+        conversation.messages.append(
+            Message(
+                role="user",
+                content=message,
+            )
+        )
 
-        
+        result = self.llm.generate(conversation) #->GenerateResult call to LLM CLIENT
+
+        if result.tool_call:
+
+            tool_result = self.tools.execute(result.tool_call) #->ToolResult #call to TOOLS CLIENT
+
+            conversation.messages.append(
+                Message(
+                    role="tool",
+                    tool_name=tool_result.tool_name,
+                    content=str(tool_result.result),
+                )
+            )
+
+            result = self.llm.generate(conversation.messages) #->GenerateResult #call to LLM CLIENT
+
+        conversation.messages.append(
+            Message(
+                role="assistant",
+                content=result.text,
+            )
+        )
+
+        self.memory.save(conversation) #->NONE #call to MEMORY CLIENT
+
+        return result.text

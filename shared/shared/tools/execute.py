@@ -1,5 +1,6 @@
 from pydantic import BaseModel
-from shared.commom.ToolCall import ToolCall
+from shared.domain.toolcall import ToolCall
+from shared.domain.toolresult import ToolResult
 
 
 class ExecuteToolRequest(BaseModel):
@@ -9,4 +10,4 @@ class ExecuteToolRequest(BaseModel):
 
 class ExecuteToolResponse(BaseModel):
 
-    result: object
+    tool_result: ToolResult
