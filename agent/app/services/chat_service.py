@@ -7,6 +7,7 @@ from shared.logging.logger import configure_logging
 from app.clients.llm_client import LLMClient
 from app.clients.tools_client import ToolsClient
 from app.clients.memory_client import MemoryClient
+from app.schemas import ToolDefinition
 
 
 logger = configure_logging(__name__)
@@ -19,12 +20,9 @@ class ChatService:
         self.memory = MemoryClient()
         self.llm = LLMClient()
         self.tools = ToolsClient()
+        
 
-    def chat(
-        self,
-        conversation_id: str,
-        message: str,
-    ) -> str:
+    def chat(self, conversation_id: str, message: str) -> str:
 
         logger.info(f"Processing chat message: {request.message}")
         conversation = self.memory.get(conversation_id) #call to MEMORY CLIENT 
@@ -35,10 +33,10 @@ class ChatService:
                 content=message,
             )
         )
+        tools = self.tools.list_tools() #->list[ToolDefinition] call to TOOLS CLIENT
+        result = self.llm.generate(conversation, tools) #->GenerateResult call to LLM CLIENT
 
-        result = self.llm.generate(conversation) #->GenerateResult call to LLM CLIENT
-
-        if result.tool_call:
+        if result.tool_call:#if the LLM response includes a tool call, execute the tool and get the result
 
             tool_result = self.tools.execute(result.tool_call) #->ToolResult #call to TOOLS CLIENT
 

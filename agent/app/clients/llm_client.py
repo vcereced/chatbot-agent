@@ -9,11 +9,11 @@ logger = configure_logging(__name__)
 
 class LLMClient(BaseClient):
 
-    def generate(self, conversation: Conversation) -> GenerateResult:
+    def generate(self, conversation: Conversation, tools: list[ToolDefinition]) -> GenerateResult:
 
-        logger.info("Received response from LLM")
 
-        request = GenerateRequest(messages=conversation.messages)
+        request = GenerateRequest(messages=conversation.messages, tools=tools)
         response = self.post(f"{config.LLM_URL}/generate", request, GenerateResponse)
+        logger.info("Received response from LLM")
 
         return response.result

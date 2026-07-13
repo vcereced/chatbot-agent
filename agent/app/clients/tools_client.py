@@ -5,11 +5,16 @@ from shared.logging.logger import configure_logging
 from shared.domain.toolcall import ToolCall
 from shared.domain.toolresult import ToolResult
 
+
 logger = configure_logging(__name__)
 
 class ToolsClient(BaseClient):
 
-     def execute(self, tool_call: ToolCall) -> ToolResult:
+    def __init__(self):
+        super().__init__()
+        self._tools = None     
+
+    def execute(self, tool_call: ToolCall) -> ToolResult:
 
         logger.info(f"Sending request to tool-executor: {tool_call.name}    with arguments: {tool_call.arguments}   ")
         response = self.post(
@@ -19,3 +24,15 @@ class ToolsClient(BaseClient):
         )
 
         return response.tool_result
+
+    def list_tools(self) -> list[ToolDefinition]:
+
+        if self._tools is None:
+            self.load_tools()
+        return self._tools
+
+    def load_tools(self):
+        response = self.get("/tools", ListToolsResponse)
+        self._tools = response.tools
+
+    
