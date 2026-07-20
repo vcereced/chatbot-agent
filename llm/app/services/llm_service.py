@@ -3,20 +3,30 @@ from shared.domain.toolcall import ToolCall
 from shared.domain.message import Message
 from shared.domain.generate_result import GenerateResult
 from shared.logging.logger import configure_logging
-
+from app.clients.openai_client import OpenAIAdapter
 logger = configure_logging(__name__)
 
 
 class LLMService:
 
-    def generate(self, messages: list[Message]) -> GenerateResult:
+    def __init__(self):
+
+        self.llm = OpenAIAdapter()
+
+    def generate(self, conversation: Conversation, tools: list[ToolDefinition]) -> GenerateResult:
 
         logger.info(f"Generating LLM response for messages: {messages}")
         
-        last_user_message = next(message for message in reversed(messages) if message.role == "user")
+        messages = OpenAIAdapter.to_messages(conversation)
 
-        prompt = last_user_message.content  
-        if prompt.startswith("/echo"):
+        tools = OpenAIAdapter.to_tools(tools)
+
+        response = self.client.generate(
+            messages,
+            tools,
+        )
+        print(response)
+        logger.info(response.model_dump())
 
             return GenerateResult(
                 tool_call=ToolCall(

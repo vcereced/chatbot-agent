@@ -6,6 +6,7 @@ logger = configure_logging(__name__)
 
 
 app = FastAPI()
+register_exception_handlers(app)
 app.include_router(execute_router)
 
 logger.info("tool-executer service started and ready to accept requests.")

@@ -19,15 +19,28 @@ class BaseClient:
 
      def get(self, url: str, response_model: type[T]) -> T:
 
+        logger.info("POST %s", url)
         try:
 
             response = self.client.get(url)
 
             return self._parse_response(response, response_model)
 
+        except httpx.HTTPStatusError as e:
+
+            raise HttpException(
+                status_code=e.response.status_code,
+                message=e.response.text,
+                url=url,
+            )
+
         except httpx.HTTPError as e:
 
-            raise ClientError(str(e))
+            raise HttpException(
+                status_code=503,
+                message=str(e),
+                url=url,
+            )
 
     def post(self, url: str, request: BaseModel, response_model: Type[T]) -> T:
 
@@ -41,8 +54,21 @@ class BaseClient:
             return self._parse_response(response, response_model)
 
             
+        except httpx.HTTPStatusError as e:
+
+            raise HttpException(
+                status_code=e.response.status_code,
+                message=e.response.text,
+                url=url,
+            )
+
         except httpx.HTTPError as e:
-            raise ClientError(str(e))
+
+            raise HttpException(
+                status_code=503,
+                message=str(e),
+                url=url,
+            )
 
     def _parse_response(self, response: httpx.Response, response_model: type[T]) -> T:
 

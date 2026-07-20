@@ -1,17 +1,23 @@
 from app.tools.echo import EchoTool
+from app.tools.calculator import CalculatorTool
+form app.tools.datetime import DatetimeTool
 
 
 class ToolRegistry:
 
     def __init__(self):
 
-        self._tools = {}
+        self._tools: dict[str, BaseTool] = {}
 
         self.register(EchoTool())
+        self.register(CalculatorTool())
+        self.register(DatetimeToolt())
 
-    def register(self, tool):
+     def register(self, tool: BaseTool) -> None:
 
-        self._tools[tool.name] = tool
+        definition = tool.get_definition()
+
+        self.tools[definition.name] = tool
 
     def get(self, name):
 
@@ -20,3 +26,10 @@ class ToolRegistry:
             raise ValueError(f"Tool '{name}' is not registered.")
 
         return self._tools[name]
+
+    def get_definitions(self) -> list[ToolDefinition]:
+
+        return [
+            tool.get_definition()
+            for tool in self.tools.values()
+        ]

@@ -32,7 +32,15 @@ class ToolsClient(BaseClient):
         return self._tools
 
     def load_tools(self):
-        response = self.get("/tools", ListToolsResponse)
-        self._tools = response.tools
+    
+        try:
+            response = self.get("/tools", ListToolsResponse)
+            self._tools = response.tools
+    
+        except HttpException as e:
 
+            if e.status_code == 404:
+                raise ToolNotFound(tool_name)
+
+            raise
     

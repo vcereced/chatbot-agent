@@ -3,6 +3,6 @@ from shared.shared.domain.conversation import Conversation
 
 class ChatResult(BaseModel):
 
-    conversation: Conversation
+    conversation_id: str
 
-    answer: str
+    response: str

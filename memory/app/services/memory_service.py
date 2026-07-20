@@ -16,10 +16,7 @@ class MemoryService:
 
         if conversation_id not in self.storage:
 
-            self.storage[conversation_id] = Conversation(
-                id=conversation_id,
-                messages=[],
-            )
+            raise ConversationNotFound(conversation_id)
 
         return self.storage[conversation_id]
 

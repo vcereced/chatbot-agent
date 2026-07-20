@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
+from shared.domain.tooldefinition import ToolDefinition
 
 
 class BaseTool(ABC):
-
-    @property
+    
     @abstractmethod
-    def name(self) -> str:
+    def get_definition(self) -> ToolDefinition:
+        """Descripción de la herramienta."""
         pass
 
     @abstractmethod

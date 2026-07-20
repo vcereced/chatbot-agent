@@ -10,9 +10,9 @@ service = LLMService()
 
 
 @router.post("/generate", response_model=GenerateResponse)
-def generate(request: GenerateRequest):
+def generate(request: GenerateRequest) -> GenerateResponse:
 
     logger.info(f"generate request: {request}")
-    result = service.generate(request.messages)
+    result = service.generate(request.messages, request.tools)
 
     return GenerateResponse(result=result)

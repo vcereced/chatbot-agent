@@ -7,6 +7,7 @@ logger = configure_logging(__name__)
 
 app = FastAPI()
 app.include_router(chat_router)
+register_exception_handlers(app)
 
 logger.info("Agent service started and ready to accept requests.")
 

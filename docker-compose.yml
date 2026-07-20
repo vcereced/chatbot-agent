@@ -34,6 +34,9 @@ services:
       - ./shared:/shared
     environment:
       PYTHONPATH: /shared
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: qwen3:8b
+      
 
   tools-executor:
     build:
@@ -56,3 +59,14 @@ services:
     volumes:
       - ./memory:/app
       - ./shared:/shared  
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+
+    ports:
+      - "11434"
+
+    volumes:
+      - ollama:/root/.ollama

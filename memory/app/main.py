@@ -7,7 +7,7 @@ from shared.logging.logger import configure_logging
 logger = configure_logging(__name__)
 
 app = FastAPI()
-
+register_exception_handlers(app)
 app.include_router(memory_router)
 
 logger.info("Memory service started and ready to accept requests.")

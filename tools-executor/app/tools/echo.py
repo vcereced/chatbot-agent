@@ -1,18 +1,27 @@
 from app.tools.base import BaseTool
 from pydantic import BaseModel
-
-class EchoArguments(BaseModel):
-    text: str
+from shared.domain.tooldefinition import ToolDefinition
 
 class EchoTool(BaseTool):
 
-    @property
-    def name(self):
+    def get_definition(self) -> ToolDefinition:
 
-        return "echo"
+        return ToolDefinition(
+            name="echo",
+            description="Returns the received text.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "text"
+                ]
+            }
+        )
 
-    def execute(self, arguments):
+    def execute(self, arguments:dict[str, object]) -> str:
 
-        args = EchoArguments.model_validate(arguments)
-        return args.text
-        # return "soy el echo"
+        return arguments.text

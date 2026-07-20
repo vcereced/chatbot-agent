@@ -4,7 +4,7 @@ from shared.domain.generate_result import GenerateResult
 from shared.domain.tool_definition import ToolDefinition
 
 class GenerateRequest(BaseModel):
-    messages: list[Message]
+    messages: Conversation
     
     tools: list[ToolDefinition]
 

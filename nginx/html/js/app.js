@@ -2,6 +2,9 @@ const chat = document.getElementById("chat");
 const input = document.getElementById("message-input");
 const sendButton = document.getElementById("send-btn");
 
+// Variable GLOBAL to store the conversation ID
+let conversationId = null;
+
 sendButton.addEventListener("click", sendMessage);
 
 input.addEventListener("keydown", (event) => {
@@ -29,7 +32,11 @@ function sendMessage() {
     //fakeAgentResponse(text);
 
     // En el futuro será:
-     sendToAgent(text);
+    const data = await sendToAgent(text);
+
+    if (data.conversation_id) {
+        conversationId = data.conversation_id;
+    }
 
 }
 
@@ -96,6 +103,13 @@ function fakeAgentResponse(message) {
 
 async function sendToAgent(message) {
 
+    const body = {
+        message: message,
+        conversation_id: conversationId
+    
+    };
+
+    
     const response = await fetch("/api/chat", {
 
         method: "POST",
@@ -104,15 +118,15 @@ async function sendToAgent(message) {
             "Content-Type": "application/json"
         },
 
-        body: JSON.stringify({
-            message: message
-        })
+        body: JSON.stringify({body})
 
     });
 
     const data = await response.json();
 
     addAgentMessage(data.response);
+
+    return data;
 
 }
 

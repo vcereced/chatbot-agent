@@ -22,5 +22,5 @@ def execute(request: ExecuteToolRequest) -> ExecuteToolResponse:
 
 @router.get("/tools", response_model=ListToolsResponse)
 def list_tools():
-
+    logger.info("get /tools")
     return ListToolsResponse(tools=service.list_tools())

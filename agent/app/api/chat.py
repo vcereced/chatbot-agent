@@ -12,13 +12,14 @@ service = ChatService()
 
 @router.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
-    logger.info(f"Received chat request: {request.message}")
+    logger.info(f"POST /chat Received  id : {request.conversation_id} chat request: {request.message}")
 
-    response = service.chat(
+    chat_result = service.chat(
         conversation_id=request.conversation_id,
         message=request.message,
     )
 
     return ChatResponse(
-        message=response,
+        conversation_id=chat_result.conversation_id,
+        message=chat_result.response,
     )
