@@ -29,7 +29,7 @@ class DirectoryTreeTool(BaseTool):
             ),
         )
 
-    def execute(self, arguments: dict[str, Any]) -> object:
+    async def execute(self, arguments: dict[str, Any]) -> object:
 
         path = Path(arguments["path"])
 

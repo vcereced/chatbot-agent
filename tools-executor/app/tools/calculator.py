@@ -1,4 +1,5 @@
-from app.tools.base_tool import BaseTool
+from app.tools.base import BaseTool
+from simpleeval import simple_eval
 
 from shared.domain.tooldefinition import (
     ToolDefinition,
@@ -26,12 +27,10 @@ class CalculatorTool(BaseTool):
             ),
         )
 
-    def execute(self, arguments: dict[str, object]) -> object:
+    async def execute(self, arguments: dict[str, object]) -> object:
+        expression = arguments.get("expression")
+        if not expression or not isinstance(expression, str):
+            raise ValueError("Parameter 'expression' must be a non-empty string.")
 
-        expression = arguments["expression"]
-
-        return eval(
-            expression,
-            {"__builtins__": {}},
-            {},
-        )
+        # Se evalúa de forma 100% segura sin riesgo de inyección de código
+        return simple_eval(expression)

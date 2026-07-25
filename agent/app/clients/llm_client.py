@@ -1,15 +1,16 @@
 from app.clients.base_client import BaseClient
 from app.config import config
-from app.schemas import GenerateRequest, GenerateResponse
+from shared.llm.generate import GenerateRequest, GenerateResponse
 from shared.logging.logger import configure_logging
 from shared.domain.conversation import Conversation
 from shared.llm.generate import GenerateResult
+from shared.domain.tooldefinition import ToolDefinition
 
 logger = configure_logging(__name__)
 
 class LLMClient(BaseClient):
 
-    def generate(self, conversation: Conversation, tools: list[ToolDefinition]) -> GenerateResult:
+    def generate(self, conversation: Conversation, tools: list[ToolDefinition] | None) -> GenerateResult:
 
 
         request = GenerateRequest(messages=conversation.messages, tools=tools)

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.schemas import ChatRequest, ChatResponse
+from shared.agent.chat import ChatRequest, ChatResponse
 from app.services.chat_service import ChatService
 from shared.logging.logger import configure_logging
 
@@ -19,6 +19,7 @@ def chat(request: ChatRequest):
         message=request.message,
     )
 
+    logger.info(f"respuesta al FRONT: {chat_result.conversation_id}, con {chat_result.response}")
     return ChatResponse(
         conversation_id=chat_result.conversation_id,
         message=chat_result.response,

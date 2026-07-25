@@ -13,14 +13,15 @@ service = ToolService()
 
 
 @router.post("/execute", response_model=ExecuteToolResponse)
-def execute(request: ExecuteToolRequest) -> ExecuteToolResponse:
-    logger.info(f"Executing tool with request: {request.tool_call.name} and arguments: {request.tool_call.arguments}")
+async def execute(request: ExecuteToolRequest) -> ExecuteToolResponse:
+    logger.info(f"Executing tool request: {request.tool_call.name}")
     
-    tool_result = service.execute(request.tool_call)
+    tool_result = await service.execute(request.tool_call)
    
     return ExecuteToolResponse(tool_result=tool_result)
 
 @router.get("/tools", response_model=ListToolsResponse)
-def list_tools():
-    logger.info("get /tools")
-    return ListToolsResponse(tools=service.list_tools())
+def list_tools() -> ListToolsResponse:
+    logger.info("GET /tools requested")
+    tools = service.list_tools()
+    return ListToolsResponse(tools=tools)

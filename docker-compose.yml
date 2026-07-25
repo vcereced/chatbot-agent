@@ -6,6 +6,9 @@ services:
       context: ./nginx
     ports:
       - "8080:80"
+    volumes:
+      # ⚠️ Mapea tus archivos locales a la ruta donde Nginx sirve la web
+      - ./nginx/html/:/usr/share/nginx/html
     depends_on:
       - agent
 
@@ -35,7 +38,9 @@ services:
     environment:
       PYTHONPATH: /shared
       OLLAMA_BASE_URL: http://ollama:11434
-      OLLAMA_MODEL: qwen3:8b
+      OLLAMA_MODEL: qwen2.5:1.5b
+      TIMEOUT: 300
+      OLLAMA_ENDPOINT: /api/chat
       
 
   tools-executor:
@@ -43,11 +48,17 @@ services:
       context: ./tools-executor
     expose:
       - "8000"
+    ports:
+      - "8000:8000"
+      - "5678:5678" # Puerto para que VS Code conecte el Debugger
+    # Arranca el servidor de debugpy en el puerto 5678 y luego lanza uvicorn
+    command: python -m debugpy --listen 0.0.0.0:5678 -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
       - ./tools-executor:/app
       - ./shared:/shared
     environment:
       PYTHONPATH: /shared
+      TOOL_TIMEOUT_SECONDS: 15.0
 
   memory:
     build:
@@ -61,12 +72,16 @@ services:
       - ./shared:/shared  
 
   ollama:
-    image: ollama/ollama:latest
+    build:
+      context: ./ollama
     container_name: ollama
     restart: unless-stopped
-
     ports:
-      - "11434"
-
+      - "11434:11434"
+    environment:
+      OLLAMA_MODEL: qwen2.5:1.5b
     volumes:
       - ollama:/root/.ollama
+
+volumes:
+  ollama:

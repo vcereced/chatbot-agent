@@ -1,7 +1,5 @@
 from datetime import datetime
-
-from app.tools.base_tool import BaseTool
-
+from app.tools.base import BaseTool
 from shared.domain.tooldefinition import (
     ToolDefinition,
     ParameterDefinition,
@@ -22,6 +20,6 @@ class DateTimeTool(BaseTool):
             ),
         )
 
-    def execute(self, arguments: dict[str, object]) -> object:
+    async def execute(self, arguments: dict[str, object]) -> object:
 
         return datetime.now().isoformat()

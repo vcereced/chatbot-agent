@@ -1,11 +1,11 @@
 from pydantic import BaseModel
 from shared.domain.conversation import Conversation
 
-class GetConversationRequest(BaseModel):
+class GetOrCreateConversationRequest(BaseModel):
 
-    conversation_id: str
+    conversation_id: str | None = None
 
-class GetConversationResponse(BaseModel):
+class GetOrCreateConversationResponse(BaseModel):
 
     conversation: Conversation
 

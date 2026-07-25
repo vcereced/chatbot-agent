@@ -1,35 +1,28 @@
 from app.tools.echo import EchoTool
 from app.tools.calculator import CalculatorTool
-form app.tools.datetime import DatetimeTool
+from app.tools.datetime import DateTimeTool
+from app.tools.base import BaseTool
+from shared.domain.tooldefinition import ToolDefinition
 
 
 class ToolRegistry:
 
     def __init__(self):
-
         self._tools: dict[str, BaseTool] = {}
-
         self.register(EchoTool())
         self.register(CalculatorTool())
-        self.register(DatetimeToolt())
+        self.register(DateTimeTool())
 
-     def register(self, tool: BaseTool) -> None:
-
+    def register(self, tool: BaseTool) -> None:
         definition = tool.get_definition()
+        self._tools[definition.name] = tool
 
-        self.tools[definition.name] = tool
-
-    def get(self, name):
-
-        if name not in self._tools:
-
-            raise ValueError(f"Tool '{name}' is not registered.")
-
-        return self._tools[name]
+    def get(self, name: str) -> BaseTool | None:
+        """Retorna la herramienta o None si no existe para evitar lanzar excepciones en la búsqueda."""
+        return self._tools.get(name)
 
     def get_definitions(self) -> list[ToolDefinition]:
-
         return [
             tool.get_definition()
-            for tool in self.tools.values()
+            for tool in self._tools.values()
         ]

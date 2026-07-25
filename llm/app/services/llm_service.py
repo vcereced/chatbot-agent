@@ -3,7 +3,10 @@ from shared.domain.toolcall import ToolCall
 from shared.domain.message import Message
 from shared.domain.generate_result import GenerateResult
 from shared.logging.logger import configure_logging
-from app.clients.openai_client import OpenAIAdapter
+from app.providers.ollama_provider import OllamaProvider
+from shared.domain.conversation import Conversation
+from shared.domain.tooldefinition import ToolDefinition
+
 logger = configure_logging(__name__)
 
 
@@ -11,28 +14,17 @@ class LLMService:
 
     def __init__(self):
 
-        self.llm = OpenAIAdapter()
+        self.llmprovider = OllamaProvider()
 
-    def generate(self, conversation: Conversation, tools: list[ToolDefinition]) -> GenerateResult:
-
-        logger.info(f"Generating LLM response for messages: {messages}")
+    def generate(self, messages: list[Message], tools: list[ToolDefinition]) -> GenerateResult:
         
-        messages = OpenAIAdapter.to_messages(conversation)
-
-        tools = OpenAIAdapter.to_tools(tools)
-
-        response = self.client.generate(
+        logger.info("XXXXXXXXXXX")
+        logger.info(f"llm_service: {messages}")
+        result = self.llmprovider.generate(
             messages,
             tools,
         )
-        print(response)
-        logger.info(response.model_dump())
+        logger.debug(result)
+        logger.info(result.model_dump())
 
-            return GenerateResult(
-                tool_call=ToolCall(
-                name="echo",
-                arguments={
-                    "text": prompt[6:].strip()
-                }))
-
-        return GenerateResult(text=f"LLM recibido: {prompt}")
+        return result

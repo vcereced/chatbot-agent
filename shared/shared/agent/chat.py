@@ -10,4 +10,4 @@ class ChatResponse(BaseModel):
 
     conversation_id: str
 
-    message: str
+    message: str# ??CHAT RESULT

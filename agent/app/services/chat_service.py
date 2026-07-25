@@ -7,8 +7,8 @@ from shared.logging.logger import configure_logging
 from app.clients.llm_client import LLMClient
 from app.clients.tools_client import ToolsClient
 from app.clients.memory_client import MemoryClient
-from app.schemas import ToolDefinition
 from shared.domain.chatresult import ChatResult
+from shared.domain.tooldefinition import ToolDefinition
 
 logger = configure_logging(__name__)
         
@@ -35,7 +35,7 @@ class ChatService:
         )
         logger.info("Getting list of tools")
         tools = self.tools.list_tools() #->list[ToolDefinition] call to TOOLS CLIENT
-        logger.info("Generating LLM response")
+        logger.info(f"Generating LLM response, {conversation} ")
         result = self.llm.generate(conversation, tools) #->GenerateResult call to LLM CLIENT
 
         if result.tool_call:#if the LLM response includes a tool call, execute the tool and get the result
@@ -50,7 +50,7 @@ class ChatService:
                 )
             )
             logger.info("generating llm with tool")
-            result = self.llm.generate(conversation.messages) #->GenerateResult #call to LLM CLIENT
+            result = self.llm.generate(conversation, None) #->GenerateResult #call to LLM CLIENT
 
         conversation.messages.append(
             Message(

@@ -14,7 +14,7 @@ input.addEventListener("keydown", (event) => {
     }
 });
 
-function sendMessage() {
+async function sendMessage() {
 
     const text = input.value.trim();
 
@@ -27,9 +27,6 @@ function sendMessage() {
     input.value = "";
 
     scrollToBottom();
-
-    // Aquí llamaremos a nuestro agente
-    //fakeAgentResponse(text);
 
     // En el futuro será:
     const data = await sendToAgent(text);
@@ -90,17 +87,6 @@ function escapeHtml(text) {
 
 }
 
-function fakeAgentResponse(message) {
-
-    setTimeout(() => {
-
-        addAgentMessage("He recibido tu mensaje: \"" + message + "\"");
-
-    }, 500);
-
-}
-
-
 async function sendToAgent(message) {
 
     const body = {
@@ -118,13 +104,18 @@ async function sendToAgent(message) {
             "Content-Type": "application/json"
         },
 
-        body: JSON.stringify({body})
+        body: JSON.stringify(body)
 
     });
 
     const data = await response.json();
 
-    addAgentMessage(data.response);
+    console.log("1. Datos:", data);
+    console.log("2. Mensaje:", data.message);
+
+    addAgentMessage(data.message);
+
+    console.log("3. Mensaje añadido");
 
     return data;
 

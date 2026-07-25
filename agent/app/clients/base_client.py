@@ -17,58 +17,26 @@ class BaseClient:
 
         self.client = httpx.Client(timeout=config.REQUEST_TIMEOUT)
 
-     def get(self, url: str, response_model: type[T]) -> T:
+    def get(self, url: str, response_model: type[T]) -> T:
 
-        logger.info("POST %s", url)
-        try:
+        logger.info("GET %s", url)
 
-            response = self.client.get(url)
+        response = self.client.get(url)
 
-            return self._parse_response(response, response_model)
+        return self._parse_response(response, response_model)
 
-        except httpx.HTTPStatusError as e:
-
-            raise HttpException(
-                status_code=e.response.status_code,
-                message=e.response.text,
-                url=url,
-            )
-
-        except httpx.HTTPError as e:
-
-            raise HttpException(
-                status_code=503,
-                message=str(e),
-                url=url,
-            )
 
     def post(self, url: str, request: BaseModel, response_model: Type[T]) -> T:
 
         logger.info("POST %s", url)
-        try:
-            response = self.client.post(
-                url,
-                json=request.model_dump(),
-            )
+        response = self.client.post(
+            url,
+            json=request.model_dump(),
+        )
 
-            return self._parse_response(response, response_model)
+        return self._parse_response(response, response_model)
 
             
-        except httpx.HTTPStatusError as e:
-
-            raise HttpException(
-                status_code=e.response.status_code,
-                message=e.response.text,
-                url=url,
-            )
-
-        except httpx.HTTPError as e:
-
-            raise HttpException(
-                status_code=503,
-                message=str(e),
-                url=url,
-            )
 
     def _parse_response(self, response: httpx.Response, response_model: type[T]) -> T:
 

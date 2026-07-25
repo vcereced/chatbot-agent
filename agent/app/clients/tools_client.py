@@ -1,9 +1,11 @@
 from app.clients.base_client import BaseClient
 from app.config import config
-from app.schemas import ExecuteToolRequest, ExecuteToolResponse
+from shared.tools.execute import ExecuteToolRequest, ExecuteToolResponse
 from shared.logging.logger import configure_logging
 from shared.domain.toolcall import ToolCall
 from shared.domain.toolresult import ToolResult
+from shared.domain.tooldefinition import ToolDefinition
+from shared.tools.list_tools import ListToolsResponse
 
 
 logger = configure_logging(__name__)
@@ -33,14 +35,8 @@ class ToolsClient(BaseClient):
 
     def load_tools(self):
     
-        try:
-            response = self.get("/tools", ListToolsResponse)
-            self._tools = response.tools
+        response = self.get(f"{config.TOOLS_URL}/tools", ListToolsResponse)
+        self._tools = response.tools
     
-        except HttpException as e:
 
-            if e.status_code == 404:
-                raise ToolNotFound(tool_name)
-
-            raise
     

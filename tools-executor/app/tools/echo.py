@@ -22,6 +22,6 @@ class EchoTool(BaseTool):
             }
         )
 
-    def execute(self, arguments:dict[str, object]) -> str:
+    async def execute(self, arguments:dict[str, object]) -> str:
 
         return arguments.text
