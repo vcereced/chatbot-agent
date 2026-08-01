@@ -11,10 +11,10 @@ service = ChatService()
 
 
 @router.post("/chat", response_model=ChatResponse)
-def chat(request: ChatRequest):
+async def chat(request: ChatRequest):
     logger.info(f"POST /chat Received  id : {request.conversation_id} chat request: {request.message}")
 
-    chat_result = service.chat(
+    chat_result = await service.chat(
         conversation_id=request.conversation_id,
         message=request.message,
     )

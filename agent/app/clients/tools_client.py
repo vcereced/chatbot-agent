@@ -16,10 +16,10 @@ class ToolsClient(BaseClient):
         super().__init__()
         self._tools = None     
 
-    def execute(self, tool_call: ToolCall) -> ToolResult:
+    async def execute(self, tool_call: ToolCall) -> ToolResult:
 
         logger.info(f"Sending request to tool-executor: {tool_call.name}    with arguments: {tool_call.arguments}   ")
-        response = self.post(
+        response = await self.post(
             f"{config.TOOLS_URL}/execute",
             ExecuteToolRequest(tool_call=tool_call),
             ExecuteToolResponse,
@@ -27,15 +27,15 @@ class ToolsClient(BaseClient):
 
         return response.tool_result
 
-    def list_tools(self) -> list[ToolDefinition]:
+    async def list_tools(self) -> list[ToolDefinition]:
 
         if self._tools is None:
-            self.load_tools()
+            await self.load_tools()
         return self._tools
 
-    def load_tools(self):
+    async def load_tools(self):
     
-        response = self.get(f"{config.TOOLS_URL}/tools", ListToolsResponse)
+        response = await self.get(f"{config.TOOLS_URL}/tools", ListToolsResponse)
         self._tools = response.tools
     
 

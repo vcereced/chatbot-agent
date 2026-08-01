@@ -22,10 +22,10 @@ class ChatService:
         self.tools = ToolsClient()
         
 
-    def chat(self, conversation_id: str | None, message: str) -> ChatResult:
+    async def chat(self, conversation_id: str | None, message: str) -> ChatResult:
 
         logger.info(f"Processing chat id: {conversation_id}, message: {message}")
-        conversation = self.memory.get_or_create(conversation_id) #call to MEMORY CLIENT 
+        conversation = await self.memory.get_or_create(conversation_id) #call to MEMORY CLIENT 
 
         conversation.messages.append(
             Message(
@@ -34,13 +34,19 @@ class ChatService:
             )
         )
         logger.info("Getting list of tools")
-        tools = self.tools.list_tools() #->list[ToolDefinition] call to TOOLS CLIENT
+        tools = await self.tools.list_tools() #->list[ToolDefinition] call to TOOLS CLIENT
         logger.info(f"Generating LLM response, {conversation} ")
-        result = self.llm.generate(conversation, tools) #->GenerateResult call to LLM CLIENT
+        result = await self.llm.generate(conversation, tools) #->GenerateResult call to LLM CLIENT
+        conversation.messages.append(
+                    Message(
+                        role="assistant",
+                        content=message,
+                    )
+                )
 
         if result.tool_call:#if the LLM response includes a tool call, execute the tool and get the result
             logger.info(f"Executing tool {result.tool_call}")
-            tool_result = self.tools.execute(result.tool_call) #->ToolResult #call to TOOLS CLIENT
+            tool_result = await self.tools.execute(result.tool_call) #->ToolResult #call to TOOLS CLIENT
 
             conversation.messages.append(
                 Message(
@@ -50,7 +56,7 @@ class ChatService:
                 )
             )
             logger.info("generating llm with tool")
-            result = self.llm.generate(conversation, None) #->GenerateResult #call to LLM CLIENT
+            result = await self.llm.generate(conversation, None) #->GenerateResult #call to LLM CLIENT
 
         conversation.messages.append(
             Message(
@@ -59,7 +65,7 @@ class ChatService:
             )
         )
         logger.info("Saving conversation")
-        self.memory.save(conversation) #->NONE #call to MEMORY CLIENT
+        await self.memory.save(conversation) #->NONE #call to MEMORY CLIENT
 
         return ChatResult(
             conversation_id=conversation.id,

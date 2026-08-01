@@ -1,30 +1,28 @@
-from app.schemas import GenerateResponse, GenerateRequest
-from shared.domain.toolcall import ToolCall
 from shared.domain.message import Message
 from shared.domain.generate_result import GenerateResult
+from shared.domain.tooldefinition import ToolDefinition
 from shared.logging.logger import configure_logging
 from app.providers.ollama_provider import OllamaProvider
-from shared.domain.conversation import Conversation
-from shared.domain.tooldefinition import ToolDefinition
 
 logger = configure_logging(__name__)
 
 
 class LLMService:
 
-    def __init__(self):
+    def __init__(self, provider: OllamaProvider | None = None) -> None:
+        self.llm_provider = provider or OllamaProvider()
 
-        self.llmprovider = OllamaProvider()
-
-    def generate(self, messages: list[Message], tools: list[ToolDefinition]) -> GenerateResult:
+    async def generate(
+        self, 
+        messages: list[Message] | None, 
+        tools: list[ToolDefinition] | None
+    ) -> GenerateResult:
         
-        logger.info("XXXXXXXXXXX")
-        logger.info(f"llm_service: {messages}")
-        result = self.llmprovider.generate(
-            messages,
-            tools,
-        )
-        logger.debug(result)
-        logger.info(result.model_dump())
-
+        logger.info(f"LLMService: procesando {len(messages) if messages else 0} mensajes.")
+        
+        # El servicio delega la ejecución al provider.
+        # Si httpx falla, la excepción sube limpiamente hacia el Router.
+        result = await self.llm_provider.generate(messages or [], tools)
+        
+        logger.debug(f"Resultado de LLMService: {result}")
         return result

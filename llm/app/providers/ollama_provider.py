@@ -1,10 +1,10 @@
-from httpx import Client
+import httpx
 from shared.domain.tooldefinition import ToolDefinition
 from shared.domain.message import Message
 from shared.domain.generate_result import GenerateResult
 from shared.logging.logger import configure_logging
 from app.adapters.ollama_mapper import OllamaMapper
-from app.config import SYSTEM_PROMPT
+from app.config import config 
 import os
 
 logger = configure_logging(__name__)
@@ -13,40 +13,41 @@ class OllamaProvider:
 
     def __init__(self):
 
-        self.model = os.getenv("OLLAMA_MODEL")
-        self.endpoint = os.getenv("OLLAMA_ENDPOINT")
-        self.client = Client(
-            base_url = os.getenv("OLLAMA_BASE_URL"),
-            timeout = float(os.getenv("TIMEOUT", 300)),
+        self.model = config.OLLAMA_MODEL
+        self.endpoint = config.OLLAMA_ENDPOINT
+        self.client = httpx.AsyncClient(
+            base_url = config.OLLAMA_BASE_URL,
+            timeout = float(config.TIMEOUT),
         )
 
-    def generate(
+    async def generate(
         self,
-        messages: list[Message],
-        tools: list[ToolDefinition],
+        messages: list[Message] | None,
+        tools: list[ToolDefinition] | None,
     ) -> GenerateResult:
 
         logger.info("before to message XXXXXXXXXXX")
         logger.info(messages)
 
         messages_for_llm = [
-            Message(role="system", content=SYSTEM_PROMPT),
+            Message(role="system", content=config.SYSTEM_PROMPT),
             *messages,
             ]
 
         payload = {
             "model": self.model,
             "messages": OllamaMapper.to_messages(messages_for_llm),
-            "tools": OllamaMapper.to_tools(tools),
             "stream": False,
         }
+        if tools:#si llegan tools se añaden al mensaje para el llm
+            payload["tools"] = OllamaMapper.to_tools(tools)
 
         logger.debug("OllamaProvider->OllamaMapper = ", payload)
         logger.info("XXXXXXXXXXX")
         logger.info(payload)
 
         try:
-            response = self.client.post(
+            response = await self.client.post(
                 self.endpoint,
                 json=payload,
             )

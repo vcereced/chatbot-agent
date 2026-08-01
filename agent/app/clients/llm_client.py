@@ -10,11 +10,11 @@ logger = configure_logging(__name__)
 
 class LLMClient(BaseClient):
 
-    def generate(self, conversation: Conversation, tools: list[ToolDefinition] | None) -> GenerateResult:
+    async def generate(self, conversation: Conversation, tools: list[ToolDefinition] | None = None) -> GenerateResult:
 
 
         request = GenerateRequest(messages=conversation.messages, tools=tools)
-        response = self.post(f"{config.LLM_URL}/generate", request, GenerateResponse)
+        response = await self.post(f"{config.LLM_URL}/generate", request, GenerateResponse)
         logger.info("Received response from LLM service: %s", response.result)
 
         return GenerateResult(text=response.result.text, tool_call=response.result.tool_call)

@@ -2,8 +2,6 @@ from typing import Type, TypeVar
 from app.config import config
 import logging
 import httpx
-from app.clients.exceptions import ClientError
-
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
@@ -15,21 +13,21 @@ class BaseClient:
 
     def __init__(self):
 
-        self.client = httpx.Client(timeout=config.REQUEST_TIMEOUT)
+        self.client = httpx.AsyncClient(timeout=int(config.REQUEST_TIMEOUT))
 
-    def get(self, url: str, response_model: type[T]) -> T:
+    async def get(self, url: str, response_model: type[T]) -> T:
 
         logger.info("GET %s", url)
 
-        response = self.client.get(url)
+        response = await self.client.get(url)
 
         return self._parse_response(response, response_model)
 
 
-    def post(self, url: str, request: BaseModel, response_model: Type[T]) -> T:
+    async def post(self, url: str, request: BaseModel, response_model: Type[T]) -> T:
 
         logger.info("POST %s", url)
-        response = self.client.post(
+        response = await self.client.post(
             url,
             json=request.model_dump(),
         )

@@ -1,11 +1,35 @@
-SYSTEM_PROMPT = """
-You are a helpful assistant.
+from functools import lru_cache
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-Always answer in Spanish.
 
-Use the available tools whenever they are necessary.
+class Settings(BaseSettings):
 
-Do not invent information that can be obtained from a tool.
+    # Configuración del Proveedor (Ollama)
+    OLLAMA_MODEL: str = "qwen2.5:1.5b"
+    OLLAMA_ENDPOINT: str = "/api/chat"
+    OLLAMA_BASE_URL: str = "http://localhost:11434"#si lo corremos en local y no en docker
+    TIMEOUT: float = 300.0
 
-If a tool is available and required to answer accurately, use it.
-""".strip()
+    # Prompts de Sistema
+    SYSTEM_PROMPT: str = """
+                You are a helpful assistant.
+
+                Always answer in Spanish.
+
+                You have access to tools.
+
+                When a tool is needed, you MUST call the tool.
+                Do not describe the tool call.
+                Do not print JSON.
+                Do not explain that you are calling a tool.
+                Return a tool call instead of text.
+                """.strip()
+
+
+
+# Inyección por caché para no releer el disco/entorno en cada llamada
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
+
+config = get_settings()

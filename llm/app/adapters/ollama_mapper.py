@@ -32,8 +32,11 @@ class OllamaMapper:
         return result
 
     @staticmethod
-    def to_tools(tools: list[ToolDefinition]) -> list[dict]:
+    def to_tools(tools: list[ToolDefinition] | None) -> list[dict]:
 
+        if tools is None:
+            return []
+        
         ollama_tools = []
 
         for tool in tools:

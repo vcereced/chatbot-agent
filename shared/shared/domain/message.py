@@ -10,6 +10,6 @@ class Message(BaseModel):
         "tool"
     ]
 
-    content: str
+    content: str | None = None
 
     tool_name: str | None = None
