@@ -29,14 +29,14 @@ class OllamaProvider:
         logger.info("before to message XXXXXXXXXXX")
         logger.info(messages)
 
-        messages_for_llm = [
-            Message(role="system", content=config.SYSTEM_PROMPT),
-            *messages,
-            ]
+    #    messages_for_llm = [
+    #        Message(role="system", content=config.SYSTEM_PROMPT),
+    #        *messages,
+    #        ]
 
         payload = {
             "model": self.model,
-            "messages": OllamaMapper.to_messages(messages_for_llm),
+            "messages": OllamaMapper.to_messages(messages),
             "stream": False,
         }
         if tools:#si llegan tools se añaden al mensaje para el llm

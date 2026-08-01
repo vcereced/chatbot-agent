@@ -1,4 +1,4 @@
-from app.tools.echo import EchoTool
+
 from app.tools.calculator import CalculatorTool
 from app.tools.datetime import DateTimeTool
 from app.tools.base import BaseTool
@@ -9,7 +9,6 @@ class ToolRegistry:
 
     def __init__(self):
         self._tools: dict[str, BaseTool] = {}
-        self.register(EchoTool())
         self.register(CalculatorTool())
         self.register(DateTimeTool())
 

@@ -10,6 +10,6 @@ class BaseTool(ABC):
         pass
 
     @abstractmethod
-    async def execute(self, arguments: dict[str, object]) -> object:
+    async def execute(self, arguments: dict[str, str]) -> object:
         """Ejecuta la herramienta recibiendo los argumentos."""
         pass

@@ -14,7 +14,21 @@ class OllamaMapper:
 
         for message in messages:
 
-            if message.role == "tool":
+            if message.role == "assistant" and message.tool_call is not None:
+
+                result.append({
+                    "role": "assistant",
+                    "tool_calls": [
+                        {
+                            "function": {
+                                "name": message.tool_call.name,
+                                "arguments": message.tool_call.arguments,
+                            }
+                        }
+                    ],
+                })
+
+            elif message.role == "tool":
 
                 result.append({
                     "role": "tool",

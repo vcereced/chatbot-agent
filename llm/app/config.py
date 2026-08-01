@@ -5,9 +5,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
 
     # Configuración del Proveedor (Ollama)
-    OLLAMA_MODEL: str = "qwen2.5:1.5b"
+    OLLAMA_MODEL: str 
     OLLAMA_ENDPOINT: str = "/api/chat"
-    OLLAMA_BASE_URL: str = "http://localhost:11434"#si lo corremos en local y no en docker
+    OLLAMA_BASE_URL: str  #si lo corremos en local y no en docker
     TIMEOUT: float = 300.0
 
     # Prompts de Sistema
