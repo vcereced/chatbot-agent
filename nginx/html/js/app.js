@@ -2,19 +2,98 @@ const chat = document.getElementById("chat");
 const input = document.getElementById("message-input");
 const sendButton = document.getElementById("send-btn");
 
-// Variable GLOBAL to store the conversation ID
 let conversationId = null;
+
+let currentPlaceholder = null;
+
+const socket = new WebSocket(
+    `ws://${window.location.host}/ws`
+);
+
+socket.onopen = () => {
+
+    console.log("WebSocket conectado");
+
+};
+
+socket.onmessage = (event) => {
+
+    const data = JSON.parse(event.data);
+
+    console.log(data);
+
+    switch (data.type) {
+
+        case "started":
+
+            updateAgentPlaceholder(
+                currentPlaceholder,
+                data.message,
+            );
+
+            break;
+
+        case "status":
+
+            updateAgentPlaceholder(
+                currentPlaceholder,
+                data.message,
+            );
+
+            break;
+
+        case "finished":
+
+            conversationId = data.conversation_id;
+
+            finishAgentPlaceholder(
+                currentPlaceholder,
+                data.message,
+            );
+
+            currentPlaceholder = null;
+
+            break;
+
+        case "error":
+
+            finishAgentPlaceholder(
+                currentPlaceholder,
+                data.message,
+            );
+
+            currentPlaceholder = null;
+
+            break;
+
+    }
+
+};
+
+
+socket.onclose = (event) => {
+    console.log("CLOSE", event.code, event.reason);
+};
+
+socket.onerror = (event) => {
+    console.log("ERROR", event);
+};
 
 sendButton.addEventListener("click", sendMessage);
 
 input.addEventListener("keydown", (event) => {
+
     if (event.key === "Enter") {
+
         event.preventDefault();
+
         sendMessage();
+
     }
+
 });
 
-async function sendMessage() {
+function sendMessage() {
 
     const text = input.value.trim();
 
@@ -26,20 +105,24 @@ async function sendMessage() {
 
     input.value = "";
 
-    scrollToBottom();
+    currentPlaceholder = createAgentPlaceholder();
 
-    // En el futuro será:
-    const data = await sendToAgent(text);
+    socket.send(JSON.stringify({
 
-    if (data.conversation_id) {
-        conversationId = data.conversation_id;
-    }
+        type: "message",
+
+        conversation_id: conversationId,
+
+        message: text,
+
+    }));
 
 }
 
 function addUserMessage(text) {
 
     const message = document.createElement("div");
+
     message.className = "message user";
 
     message.innerHTML = `
@@ -50,22 +133,55 @@ function addUserMessage(text) {
 
     chat.appendChild(message);
 
+    scrollToBottom();
+
 }
 
-function addAgentMessage(text) {
+function createAgentPlaceholder() {
 
     const message = document.createElement("div");
+
     message.className = "message agent";
 
     message.innerHTML = `
         <img src="images/robot.svg" class="bubble-avatar">
 
-        <div class="bubble">
-            ${escapeHtml(text)}
+        <div class="bubble status">
+            Pensando...
         </div>
     `;
 
     chat.appendChild(message);
+
+    scrollToBottom();
+
+    return message;
+
+}
+
+function updateAgentPlaceholder(message, text) {
+
+    if (!message) {
+        return;
+    }
+
+    message.querySelector(".bubble").textContent = text;
+
+    scrollToBottom();
+
+}
+
+function finishAgentPlaceholder(message, text) {
+
+    if (!message) {
+        return;
+    }
+
+    const bubble = message.querySelector(".bubble");
+
+    bubble.classList.remove("status");
+
+    bubble.textContent = text;
 
     scrollToBottom();
 
@@ -86,38 +202,3 @@ function escapeHtml(text) {
     return div.innerHTML;
 
 }
-
-async function sendToAgent(message) {
-
-    const body = {
-        message: message,
-        conversation_id: conversationId
-    
-    };
-
-    
-    const response = await fetch("/api/chat", {
-
-        method: "POST",
-
-        headers: {
-            "Content-Type": "application/json"
-        },
-
-        body: JSON.stringify(body)
-
-    });
-
-    const data = await response.json();
-
-    console.log("1. Datos:", data);
-    console.log("2. Mensaje:", data.message);
-
-    addAgentMessage(data.message);
-
-    console.log("3. Mensaje añadido");
-
-    return data;
-
-}
-
