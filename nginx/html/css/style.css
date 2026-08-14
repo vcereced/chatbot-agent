@@ -276,3 +276,38 @@ body {
     }
 
 }
+
+.status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0.75;
+}
+
+.status-dot {
+    width: 7px;
+    height: 7px;
+    min-width: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: statusPulse 1s infinite;
+}
+
+.status-text {
+    transition: opacity 0.2s ease;
+}
+
+@keyframes statusPulse {
+
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+}

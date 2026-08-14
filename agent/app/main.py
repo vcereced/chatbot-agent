@@ -24,7 +24,7 @@ for route in app.router.routes:
     logger.info(f"{type(route).__name__}: {getattr(route, 'path', '-')}")
 
 
-
+@app.get("/health", status_code=200)
 @app.get("/")
 def root():
     return {"status": "ok"}

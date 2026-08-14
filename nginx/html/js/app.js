@@ -3,18 +3,39 @@ const input = document.getElementById("message-input");
 const sendButton = document.getElementById("send-btn");
 
 let conversationId = null;
-
 let currentPlaceholder = null;
+
+// Cola de estados recibidos desde el backend
+let statusQueue = [];
+
+// Indica si actualmente estamos mostrando un estado
+let isShowingStatus = false;
+
+// Respuesta final recibida del backend
+let finalResponse = null;
+
+// Indica que el backend ya ha terminado
+let processingFinished = false;
+
+// Tiempo mínimo que se muestra cada estado
+const STATUS_DURATION = 2000;
+
+
+// ============================================================
+// WEBSOCKET
+// ============================================================
 
 const socket = new WebSocket(
     `ws://${window.location.host}/ws`
 );
+
 
 socket.onopen = () => {
 
     console.log("WebSocket conectado");
 
 };
+
 
 socket.onmessage = (event) => {
 
@@ -25,44 +46,37 @@ socket.onmessage = (event) => {
     switch (data.type) {
 
         case "started":
-
-            updateAgentPlaceholder(
-                currentPlaceholder,
-                data.message,
-            );
-
-            break;
-
         case "status":
 
-            updateAgentPlaceholder(
-                currentPlaceholder,
-                data.message,
-            );
+            enqueueStatus(data.message);
 
             break;
+
 
         case "finished":
 
             conversationId = data.conversation_id;
 
-            finishAgentPlaceholder(
-                currentPlaceholder,
-                data.message,
-            );
+            finalResponse = data.message;
 
-            currentPlaceholder = null;
+            processingFinished = true;
+
+            processStatusQueue();
 
             break;
 
+
         case "error":
 
-            finishAgentPlaceholder(
-                currentPlaceholder,
-                data.message,
-            );
+            // En caso de error no tiene sentido seguir
+            // mostrando estados pendientes.
+            statusQueue = [];
 
-            currentPlaceholder = null;
+            finalResponse = data.message;
+
+            processingFinished = true;
+
+            processStatusQueue();
 
             break;
 
@@ -72,14 +86,25 @@ socket.onmessage = (event) => {
 
 
 socket.onclose = (event) => {
+
     console.log("CLOSE", event.code, event.reason);
+
 };
+
 
 socket.onerror = (event) => {
+
     console.log("ERROR", event);
+
 };
 
+
+// ============================================================
+// INPUT
+// ============================================================
+
 sendButton.addEventListener("click", sendMessage);
+
 
 input.addEventListener("keydown", (event) => {
 
@@ -93,6 +118,11 @@ input.addEventListener("keydown", (event) => {
 
 });
 
+
+// ============================================================
+// SEND MESSAGE
+// ============================================================
+
 function sendMessage() {
 
     const text = input.value.trim();
@@ -101,11 +131,22 @@ function sendMessage() {
         return;
     }
 
+
     addUserMessage(text);
 
     input.value = "";
 
+
+    // Resetear el estado de la conversación visual
+    statusQueue = [];
+    isShowingStatus = false;
+    finalResponse = null;
+    processingFinished = false;
+
+
+    // Crear bubble del agente
     currentPlaceholder = createAgentPlaceholder();
+
 
     socket.send(JSON.stringify({
 
@@ -119,6 +160,109 @@ function sendMessage() {
 
 }
 
+
+// ============================================================
+// STATUS QUEUE
+// ============================================================
+
+function enqueueStatus(text) {
+
+    if (!currentPlaceholder) {
+        return;
+    }
+
+
+    // Evitar estados repetidos consecutivos.
+    //
+    // Ejemplo:
+    //
+    // Pensando
+    // Pensando
+    // Pensando
+    //
+    // Solo mostramos uno.
+    const lastStatus = statusQueue[statusQueue.length - 1];
+
+    if (lastStatus === text) {
+        return;
+    }
+
+
+    statusQueue.push(text);
+
+    processStatusQueue();
+
+}
+
+
+function processStatusQueue() {
+
+    // Ya estamos mostrando un estado.
+    if (isShowingStatus) {
+        return;
+    }
+
+
+    if (!currentPlaceholder) {
+        return;
+    }
+
+
+    // ========================================================
+    // TODAVÍA HAY ESTADOS POR MOSTRAR
+    // ========================================================
+
+    if (statusQueue.length > 0) {
+
+        const status = statusQueue.shift();
+
+        showStatus(status);
+
+        isShowingStatus = true;
+
+
+        setTimeout(() => {
+
+            isShowingStatus = false;
+
+            processStatusQueue();
+
+        }, STATUS_DURATION);
+
+
+        return;
+    }
+
+
+    // ========================================================
+    // NO QUEDAN ESTADOS
+    //
+    // Si además el backend ha terminado, mostramos la
+    // respuesta final.
+    // ========================================================
+
+    if (processingFinished) {
+
+        finishAgentPlaceholder(
+            currentPlaceholder,
+            finalResponse
+        );
+
+
+        currentPlaceholder = null;
+
+        processingFinished = false;
+        finalResponse = null;
+
+    }
+
+}
+
+
+// ============================================================
+// USER MESSAGE
+// ============================================================
+
 function addUserMessage(text) {
 
     const message = document.createElement("div");
@@ -131,11 +275,17 @@ function addUserMessage(text) {
         </div>
     `;
 
+
     chat.appendChild(message);
 
     scrollToBottom();
 
 }
+
+
+// ============================================================
+// AGENT PLACEHOLDER
+// ============================================================
 
 function createAgentPlaceholder() {
 
@@ -147,29 +297,63 @@ function createAgentPlaceholder() {
         <img src="images/robot.svg" class="bubble-avatar">
 
         <div class="bubble status">
-            Pensando...
+
+            <span class="status-dot"></span>
+
+            <span class="status-text">
+                Pensando...
+            </span>
+
         </div>
     `;
+
 
     chat.appendChild(message);
 
     scrollToBottom();
 
+
     return message;
 
 }
 
-function updateAgentPlaceholder(message, text) {
 
-    if (!message) {
+// ============================================================
+// SHOW STATUS
+// ============================================================
+
+function showStatus(text) {
+
+    if (!currentPlaceholder) {
         return;
     }
 
-    message.querySelector(".bubble").textContent = text;
+
+    const bubble =
+        currentPlaceholder.querySelector(".bubble");
+
+    const statusText =
+        currentPlaceholder.querySelector(".status-text");
+
+
+    if (!statusText) {
+        return;
+    }
+
+
+    bubble.classList.add("status");
+
+    statusText.textContent = text;
+
 
     scrollToBottom();
 
 }
+
+
+// ============================================================
+// FINISH AGENT MESSAGE
+// ============================================================
 
 function finishAgentPlaceholder(message, text) {
 
@@ -177,21 +361,36 @@ function finishAgentPlaceholder(message, text) {
         return;
     }
 
-    const bubble = message.querySelector(".bubble");
+
+    const bubble =
+        message.querySelector(".bubble");
+
 
     bubble.classList.remove("status");
 
-    bubble.textContent = text;
+
+    bubble.innerHTML = escapeHtml(text);
+
 
     scrollToBottom();
 
 }
+
+
+// ============================================================
+// SCROLL
+// ============================================================
 
 function scrollToBottom() {
 
     chat.scrollTop = chat.scrollHeight;
 
 }
+
+
+// ============================================================
+// HTML ESCAPING
+// ============================================================
 
 function escapeHtml(text) {
 
