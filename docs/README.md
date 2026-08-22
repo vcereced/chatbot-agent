@@ -202,7 +202,7 @@ nuevo_servicio/
 ### Añadir una nueva herramienta
 
 1. Crear la herramienta dentro de `tools-executor/app/tools/`.
-2. Registrarla en el `ToolRegistry`.
+2. Registrarla en el `/app/registry/tool_registry.py` y registralos en la clase ToolRegistry.
 
 ### Cambiar proveedor de IA
 
