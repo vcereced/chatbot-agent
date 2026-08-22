@@ -1,4 +1,4 @@
-# Chatbot Agent
+# Chatbot Agent + tools
 
 Un agente conversacional que ejecuta tools distribuido por microservicios, diseñado para ser modular, reutilizable, escalable y fácil de adaptar a distintos proveedores de IA, persistencia o herramientas.
 
