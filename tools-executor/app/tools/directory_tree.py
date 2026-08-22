@@ -17,7 +17,7 @@ class DirectoryTreeTool(BaseTool):
         return ToolDefinition(
             name="directory_tree",
             description="Returns the directory tree of a given path.",
-            parameters=ParameterDefinition(
+            input_schema=ParameterDefinition(
                 type="object",
                 properties={
                     "path": PropertyDefinition(

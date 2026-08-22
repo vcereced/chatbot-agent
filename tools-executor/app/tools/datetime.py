@@ -13,7 +13,7 @@ class DateTimeTool(BaseTool):
         return ToolDefinition(
             name="datetime",
             description="Returns the current date and time.",
-            parameters=ParameterDefinition(
+            input_schema=ParameterDefinition(
                 type="object",
                 properties={},
                 required=[],

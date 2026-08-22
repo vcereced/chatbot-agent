@@ -33,4 +33,4 @@ class ParameterDefinition(BaseModel):
 class ToolDefinition(BaseModel):
     name: str
     description: str
-    parameters: ParameterDefinition
+    input_schema: ParameterDefinition

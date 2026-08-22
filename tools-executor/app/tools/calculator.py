@@ -15,7 +15,7 @@ class CalculatorTool(BaseTool):
         return ToolDefinition(
             name="calculator",
             description="Evaluate a mathematical expression.",
-            parameters=ParameterDefinition(
+            input_schema=ParameterDefinition(
                 type="object",
                 properties={
                     "expression": PropertyDefinition(
